@@ -74,7 +74,7 @@ const initStorage = async (): Promise<void> => {
 const createButtonConfig = (
   storageKey: string,
   type: string,
-  search: string = 'https://www.google.com/search?q="$TL-TEXT$"',
+  search: string = "https://www.google.com/search?q=$TL-TEXT$",
   share: string = "https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$",
   char: string = ""
 ): ButtonConfig => {

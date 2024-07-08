@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "Text Launcher"
+  },
+  "appDescription": {
+    "message": "選択したテキストをコピーしたり、検索したり、シェアしたり、読み上げたりする拡張機能です。"
+  }
+}

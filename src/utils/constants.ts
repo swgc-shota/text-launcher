@@ -1,3 +1,4 @@
+export const APP_NAME = "text-launcher";
 export const MSG_TYPE = {
   TOGGLE_APP: "text-launcher--0",
   SUCCESS: "text-launcher--1",

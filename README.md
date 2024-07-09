@@ -1,4 +1,4 @@
-This extension allows you to copy, read aloud, search with any service, or share the selected text.
+This extension allows you to copy, read aloud, search, or share the selected text.
 
 Features Overview
 

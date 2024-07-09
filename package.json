@@ -24,7 +24,7 @@
     "vanjs-ext": "^0.6.0",
     "vite": "^5.2.11"
   },
-  "description": "This extension allows you to copy selected text or search for it with any search engine..",
+  "description": "This extension allows you to copy, read aloud, search, or share the selected text.",
   "author": "",
   "license": "ISC"
 }

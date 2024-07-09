@@ -37,3 +37,16 @@ export const fetchButtonConfigs = async () => {
   }
   return result;
 };
+
+export const fireCustomEvent = (
+  customEventName: string,
+  detail: any = {},
+  element: Element | Document = document
+) => {
+  const event = new CustomEvent(customEventName, {
+    detail: detail,
+    bubbles: true,
+    cancelable: true,
+  });
+  element.dispatchEvent(event);
+};

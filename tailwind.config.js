@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       zIndex: {
-        max: "2147483647",
+        max: "2147400000", //2147483647
       },
       keyframes: {
         "text-bounce": {

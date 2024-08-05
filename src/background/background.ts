@@ -1,22 +1,6 @@
 import { STOR_KEY, APP_STATUS, MSG_TYPE } from "../utils/constants";
 import type { Message, AppStatus, ButtonConfig } from "../utils/constants";
 
-const loadApp = async () => {
-  // This event occurs when an extension is uploaded.
-  chrome.runtime.onInstalled.addListener(initBadge);
-  chrome.runtime.onInstalled.addListener(reloadAllTabs);
-  // This event occurs when the browser is uploaded.
-  chrome.runtime.onStartup.addListener(initBadge);
-  chrome.runtime.onStartup.addListener(reloadAllTabs);
-  /**
-   * When the extension is installed, all tabs are reloaded.
-   * However, When the extension is toggled on or off, tabs are not automatically reloaded.
-   * Therefore, initApp() and reloadAllTabs() are explicitly called here.
-   */
-  await initApp();
-  reloadAllTabs();
-};
-
 const reloadAllTabs = async () => {
   const tabs = await chrome.tabs.query({});
   for (const tab of tabs) {
@@ -103,56 +87,6 @@ const updateBadge = (newStatus: AppStatus) => {
   chrome.action.setIcon({ path: `images/${iconName}` });
 };
 
-const initListeners = (): void => {
-  chrome.action.onClicked.addListener(clickListener);
-  chrome.runtime.onMessage.addListener(messageListener);
-};
-
-const clickListener = async (): Promise<void> => {
-  const currentStatus: AppStatus = await getAppStatus();
-  const isOn = currentStatus === APP_STATUS.ON;
-  const newStatus = isOn ? APP_STATUS.OFF : APP_STATUS.ON;
-  const message: Message = {
-    type: MSG_TYPE.TOGGLE_APP,
-    newStatus: newStatus,
-  };
-  toggleApp(message);
-};
-
-const messageListener = (
-  message: Message,
-  sender: chrome.runtime.MessageSender,
-  sendResponse: (response?: any) => void
-) => {
-  const _tabId = sender.tab?.id;
-  const exceptTabIds = _tabId === undefined ? [] : [_tabId];
-
-  switch (message.type) {
-    case MSG_TYPE.TOGGLE_APP:
-      toggleApp(message, exceptTabIds);
-      break;
-
-    case MSG_TYPE.OPEN_OPTION_PAGE:
-      openOptionsPage();
-      break;
-
-    default:
-      sendResponse({ type: MSG_TYPE.UNKNOWN });
-  }
-
-  sendResponse({ type: MSG_TYPE.SUCCESS });
-};
-
-const openOptionsPage = () => {
-  chrome.runtime.openOptionsPage(() => {
-    if (chrome.runtime.lastError) {
-      console.error(`Error opening options page: ${chrome.runtime.lastError}`);
-    } else {
-      console.log("Options page opened successfully");
-    }
-  });
-};
-
 const toggleApp = async (message: Message, exceptTabIds: number[] = []) => {
   await sendMessageToAllTabs(message, exceptTabIds);
   await chrome.storage.local.set({
@@ -201,14 +135,64 @@ const sendMessageToValidTab = async (
   }
 };
 
-self.addEventListener("install", async () => loadApp());
+const sw: ServiceWorkerGlobalScope = self as any;
 
-/**
- * Since manifest v3,
- * background.js has become a service worker and is disabled when not in use.
- * To deal with this, run only initListener() here.
- */
+// Extenstion restarted
+sw.addEventListener("activate", async (_: ExtendableEvent) => {
+  await initBadge();
+});
 
-initListeners();
+// Extension installed or updated
+chrome.runtime.onInstalled.addListener(async () => {
+  await initApp();
+  await reloadAllTabs();
+});
+// Browser launched (includes updated)
+chrome.runtime.onStartup.addListener(async () => {
+  await initBadge();
+});
 
-export {};
+chrome.action.onClicked.addListener(async (): Promise<void> => {
+  const currentStatus: AppStatus = await getAppStatus();
+  const isOn = currentStatus === APP_STATUS.ON;
+  const newStatus = isOn ? APP_STATUS.OFF : APP_STATUS.ON;
+  const message: Message = {
+    type: MSG_TYPE.TOGGLE_APP,
+    newStatus: newStatus,
+  };
+  toggleApp(message);
+});
+
+const openOptionsPage = () => {
+  chrome.runtime.openOptionsPage(() => {
+    if (chrome.runtime.lastError) {
+      console.error(`Error opening options page: ${chrome.runtime.lastError}`);
+    }
+  });
+};
+
+chrome.runtime.onMessage.addListener(
+  (
+    message: Message,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    const _tabId = sender.tab?.id;
+    const exceptTabIds = _tabId === undefined ? [] : [_tabId];
+
+    switch (message.type) {
+      case MSG_TYPE.TOGGLE_APP:
+        toggleApp(message, exceptTabIds);
+        break;
+
+      case MSG_TYPE.OPEN_OPTION_PAGE:
+        openOptionsPage();
+        break;
+
+      default:
+        sendResponse({ type: MSG_TYPE.UNKNOWN });
+    }
+
+    sendResponse({ type: MSG_TYPE.SUCCESS });
+  }
+);

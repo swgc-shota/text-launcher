@@ -133,6 +133,8 @@ export const SpeakButton = (
     {
       class: classes,
       onclick: (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);
         speakText(selectedText.val);
       },

@@ -67,6 +67,8 @@ export const CopyButton = (
     {
       class: classes,
       onclick: (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);
         copyText(selectedText.val);
       },

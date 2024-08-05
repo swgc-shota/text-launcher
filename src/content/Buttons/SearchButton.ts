@@ -46,6 +46,8 @@ export const SearchButton = (
     {
       class: classes,
       onclick: (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);
         searchText(config.searchUrl!, selectedText.val);
       },

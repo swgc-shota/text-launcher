@@ -50,6 +50,8 @@ export const ShareButton = (
     {
       class: classes,
       onclick: (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);
         shareText(config.shareUrl!, selectedText.val);
       },

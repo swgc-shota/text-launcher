@@ -1,11 +1,14 @@
-import "./content.css";
+import './text-launcher.css';
 
-import { initTextLauncher, deinitTextLauncher } from "./TextLauncher";
-import type { Message } from "../utils/constants";
+import {
+  initTextLauncher,
+  deinitTextLauncher,
+} from './TextLauncher/TextLauncher';
+import type { Message } from '../utils/constants';
 
-import { fireCustomEvent } from "../utils/misc";
-import { fetchFromLocalStorage } from "../utils/misc";
-import { MY_EVT, MSG_TYPE, STOR_KEY, APP_STATUS } from "../utils/constants";
+import { fireCustomEvent } from '../utils/misc';
+import { fetchFromLocalStorage } from '../utils/misc';
+import { MY_EVT, MSG_TYPE, STOR_KEY, APP_STATUS } from '../utils/constants';
 
 const initAppStateToggler = async (): Promise<void> => {
   chrome.runtime.onMessage.addListener(messageListener);

@@ -1,18 +1,18 @@
-import fs from "fs";
-import { defineConfig, loadEnv, build } from "vite";
-import { resolve } from "path";
+import fs from 'fs';
+import { defineConfig, loadEnv, build } from 'vite';
+import { resolve } from 'path';
 
 const entries = {
-  background: resolve(__dirname, "src/background/background.ts"),
-  content: resolve(__dirname, "src/content/content.ts"),
-  option: resolve(__dirname, "src/option/option.ts"),
+  background: resolve(__dirname, 'src/background/background.ts'),
+  'text-launcher': resolve(__dirname, 'src/content/text-launcher.ts'),
+  option: resolve(__dirname, 'src/option/option.ts'),
 };
 
 export default defineConfig(async ({ command }) => {
-  const env = loadEnv("", process.cwd(), "");
+  const env = loadEnv('', process.cwd(), '');
 
-  if (command === "build") {
-    const outDir = resolve(__dirname, "dist");
+  if (command === 'build') {
+    const outDir = resolve(__dirname, 'dist');
 
     if (fs.existsSync(outDir)) {
       fs.rmSync(outDir, { recursive: true, force: true });
@@ -22,7 +22,7 @@ export default defineConfig(async ({ command }) => {
     for (const [name, entry] of Object.entries(entries)) {
       await build({
         configFile: false,
-        root: "src",
+        root: 'src',
         build: {
           outDir,
           emptyOutDir: false,
@@ -31,7 +31,7 @@ export default defineConfig(async ({ command }) => {
             output: {
               entryFileNames: `${name}.js`,
               assetFileNames: (assetInfo) => {
-                if (assetInfo.name && assetInfo.name.endsWith(".css")) {
+                if (assetInfo.name && assetInfo.name.endsWith('.css')) {
                   return `${name}.css`;
                 }
                 return assetInfo.name;
@@ -60,7 +60,7 @@ export default defineConfig(async ({ command }) => {
       });
     }
 
-    const publicDir = resolve(__dirname, "public");
+    const publicDir = resolve(__dirname, 'public');
     if (fs.existsSync(publicDir)) {
       fs.cpSync(publicDir, outDir, { recursive: true });
     }
@@ -69,12 +69,12 @@ export default defineConfig(async ({ command }) => {
   }
 
   const config = {
-    root: "src",
+    root: 'src',
     build: {
-      outDir: "../dist",
+      outDir: '../dist',
       emptyOutDir: true,
     },
-    publicDir: "../public",
+    publicDir: '../public',
   };
 
   if (env.VITE_BASE_PATH !== undefined) {

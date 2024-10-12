@@ -4,18 +4,18 @@
   "description": "__MSG_appDescription__",
   "default_locale": "en",
   "version": "1.0.1",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage", "tabs", "management"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "web_accessible_resources": [
     {
-      "resources": ["content.css"],
+      "resources": ["text-launcher.css"],
       "matches": ["http://*/*", "https://*/*"]
     }
   ],
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
+      "js": ["text-launcher.js"],
       "all_frames": true
     }
   ],

@@ -1,5 +1,5 @@
-import { STOR_KEY, APP_STATUS, MSG_TYPE } from "../utils/constants";
-import type { Message, AppStatus, ButtonConfig } from "../utils/constants";
+import { STOR_KEY, APP_STATUS, MSG_TYPE } from '../utils/constants';
+import type { Message, AppStatus, ButtonConfig } from '../utils/constants';
 
 const reloadAllTabs = async () => {
   const tabs = await chrome.tabs.query({});
@@ -7,7 +7,7 @@ const reloadAllTabs = async () => {
     // Filter out non-HTTP content such as chrome://, file://, etc.
     const isHttpOrHttps =
       tab.url &&
-      (tab.url.startsWith("http://") || tab.url.startsWith("https://"));
+      (tab.url.startsWith('http://') || tab.url.startsWith('https://'));
     if (tab.id && isHttpOrHttps) {
       chrome.tabs.reload(tab.id);
     }
@@ -28,28 +28,28 @@ const initStorage = async (): Promise<void> => {
     await chrome.storage.local.set({
       [STOR_KEY.BUTTON_CONFIG_0]: createButtonConfig(
         STOR_KEY.BUTTON_CONFIG_0,
-        "search"
+        'search'
       ),
     });
     await chrome.storage.local.set({
       [STOR_KEY.BUTTON_CONFIG_1]: createButtonConfig(
         STOR_KEY.BUTTON_CONFIG_1,
-        "copy"
+        'copy'
       ),
     });
     await chrome.storage.local.set({
       [STOR_KEY.BUTTON_CONFIG_2]: createButtonConfig(
         STOR_KEY.BUTTON_CONFIG_2,
-        "share",
-        "https://www.google.com/search?q=$TL-TEXT$",
-        "https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$",
-        "𝕏"
+        'share',
+        'https://www.google.com/search?q=$TL-TEXT$',
+        'https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$',
+        '𝕏'
       ),
     });
     await chrome.storage.local.set({
       [STOR_KEY.BUTTON_CONFIG_3]: createButtonConfig(
         STOR_KEY.BUTTON_CONFIG_3,
-        "speak"
+        'speak'
       ),
     });
   }
@@ -58,9 +58,9 @@ const initStorage = async (): Promise<void> => {
 const createButtonConfig = (
   storageKey: string,
   type: string,
-  search: string = "https://www.google.com/search?q=$TL-TEXT$",
-  share: string = "https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$",
-  char: string = ""
+  search: string = 'https://www.google.com/search?q=$TL-TEXT$',
+  share: string = 'https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$',
+  char: string = ''
 ): ButtonConfig => {
   return {
     storageKey,
@@ -83,7 +83,7 @@ const initBadge = async (): Promise<void> => {
 
 const updateBadge = (newStatus: AppStatus) => {
   const isNewStatusOff = newStatus === APP_STATUS.OFF;
-  const iconName = isNewStatusOff ? "icon16_off.png" : "icon16_on.png";
+  const iconName = isNewStatusOff ? 'icon16_off.png' : 'icon16_on.png';
   chrome.action.setIcon({ path: `images/${iconName}` });
 };
 
@@ -117,7 +117,7 @@ const sendMessageToValidTab = async (
   message: Message
 ) => {
   // Filter out non-HTTP content such as chrome://, file://, etc.
-  const isHttpOrHttps = url.startsWith("http://") || url.startsWith("https://");
+  const isHttpOrHttps = url.startsWith('http://') || url.startsWith('https://');
   if (!isHttpOrHttps) {
     return;
   }
@@ -125,7 +125,7 @@ const sendMessageToValidTab = async (
   try {
     const messageResponse = await chrome.tabs.sendMessage(tabId, message);
     if (messageResponse === MSG_TYPE.FAILED) {
-      console.warn("Message was received correctly, but processing failed.");
+      console.warn('Message was received correctly, but processing failed.');
     }
   } catch (error) {
     console.warn(
@@ -138,7 +138,7 @@ const sendMessageToValidTab = async (
 const sw: ServiceWorkerGlobalScope = self as any;
 
 // Extenstion restarted
-sw.addEventListener("activate", async (_: ExtendableEvent) => {
+sw.addEventListener('activate', async (_: ExtendableEvent) => {
   await initBadge();
 });
 
@@ -177,22 +177,55 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response?: any) => void
   ) => {
-    const _tabId = sender.tab?.id;
-    const exceptTabIds = _tabId === undefined ? [] : [_tabId];
+    handleMessage(message, sender).then(sendResponse);
+    return true;
+  }
+);
 
+async function handleMessage(
+  message: Message,
+  sender: chrome.runtime.MessageSender
+) {
+  const _tabId = sender.tab?.id;
+  const exceptTabIds = _tabId === undefined ? [] : [_tabId];
+  let result = {};
+
+  try {
     switch (message.type) {
       case MSG_TYPE.TOGGLE_APP:
-        toggleApp(message, exceptTabIds);
+        await toggleApp(message, exceptTabIds);
         break;
 
       case MSG_TYPE.OPEN_OPTION_PAGE:
-        openOptionsPage();
+        await openOptionsPage();
         break;
-
+      /*
+      case MSG_TYPE.IS_INSTALLED:
+        result = {
+          isExtensionInstalled: await isExtensionInstalled(
+            "gfdikilcklflffnhapfibppbfoaaemle"
+          ),
+        };
+        break;
+*/
       default:
-        sendResponse({ type: MSG_TYPE.UNKNOWN });
+        return { type: MSG_TYPE.UNKNOWN };
     }
-
-    sendResponse({ type: MSG_TYPE.SUCCESS });
+    return { type: MSG_TYPE.SUCCESS, ...result };
+  } catch (error) {
+    return { type: MSG_TYPE.UNKNOWN, error: error };
   }
-);
+}
+/*
+const isExtensionInstalled = (extensionId: string) => {
+  return new Promise((resolve) => {
+    chrome.management.get(extensionId, (_) => {
+      if (chrome.runtime.lastError) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+};
+*/

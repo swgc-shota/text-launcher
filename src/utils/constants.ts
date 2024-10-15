@@ -1,10 +1,11 @@
 export const APP_NAME = "text-launcher";
 export const MSG_TYPE = {
-  TOGGLE_APP: "text-launcher--0",
-  SUCCESS: "text-launcher--1",
-  FAILED: "text-launcher--2",
-  UNKNOWN: "text-launcher--3",
-  OPEN_OPTION_PAGE: `text-launcher--4`,
+  TOGGLE_APP: "0",
+  SUCCESS: "1",
+  FAILED: "2",
+  UNKNOWN: "3",
+  OPEN_OPTION_PAGE: `4`,
+  IS_INSTALLED: `5`,
 } as const;
 type MessageType = (typeof MSG_TYPE)[keyof typeof MSG_TYPE];
 
@@ -21,7 +22,7 @@ export type Message = {
 
 export const MY_EVT = {
   ...MSG_TYPE,
-  REMOVE_CONTAINER: "text-launcher--5",
+  REMOVE_CONTAINER: "6",
 } as const;
 
 export const BUTTON_CONFIG_KEY = {
@@ -53,5 +54,6 @@ export const BUTTON_TYPE = {
   SEARCH: "search",
   SHARE: "share",
   SPEAK: "speak",
+  NOTE: "note",
 } as const;
 export type ButtonType = (typeof BUTTON_TYPE)[keyof typeof BUTTON_TYPE];

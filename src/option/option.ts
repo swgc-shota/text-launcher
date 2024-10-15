@@ -1,21 +1,16 @@
-import "./option.css";
+import './option.css';
 
-import van /*, { State }*/ from "vanjs-core";
-import * as vanX from "vanjs-ext";
-import { ButtonConfig, ButtonType } from "../utils/constants";
-import { fetchButtonConfigs, saveToLocalStorage } from "../utils/misc";
+import van /*, { State }*/ from 'vanjs-core';
+import * as vanX from 'vanjs-ext';
+import { ButtonConfig, ButtonType } from '../utils/constants';
+import { fetchButtonConfigs, saveToLocalStorage } from '../utils/misc';
 import {
   isValidSearchURLTemplate,
   isValidShareURLTemplate,
   isValidCharacter,
-} from "../utils/validation";
-
+} from '../utils/validation';
+//import { MSG_TYPE } from '../utils/constants';
 const { div, h2, label, input, span, p } = van.tags;
-
-interface ConfigCardProps {
-  id: number;
-  config: ButtonConfig;
-}
 
 const formatStateToButtonConfig = (config: any): ButtonConfig => {
   return {
@@ -26,16 +21,20 @@ const formatStateToButtonConfig = (config: any): ButtonConfig => {
     buttonChar: config.buttonChar,
   };
 };
-
-const ConfigCard = ({ id, config }: ConfigCardProps) => {
+interface ConfigCardProps {
+  index: number;
+  config: ButtonConfig;
+  buttonTypes: any;
+}
+const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
   const { storageKey } = config;
   const data = vanX.reactive({
     config: {
       storageKey: config.storageKey,
       buttonType: config.buttonType,
-      searchUrl: config.searchUrl || "",
-      shareUrl: config.shareUrl || "",
-      buttonChar: config.buttonChar || "",
+      searchUrl: config.searchUrl || '',
+      shareUrl: config.shareUrl || '',
+      buttonChar: config.buttonChar || '',
     },
     validation: {
       isValidSearchUrl: true,
@@ -44,27 +43,25 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
     },
   });
 
-  const buttonTypes = ["search", "copy", "share", "speak"] as ButtonType[];
-
   return div(
     {
       class:
-        "max-w-lg w-full mx-auto bg-white border border-stone-500 shadow-md rounded-md px-8 pt-8 mb-8",
+        'max-w-lg w-full mx-auto bg-white border border-stone-500 shadow-md rounded-md px-8 pt-8 mb-8',
     },
-    h2({ class: "text-center text-xl font-bold mb-6" }, `Button #${id + 1}`),
+    h2({ class: 'text-center text-xl font-bold mb-6' }, `Button #${index + 1}`),
     div(
-      { class: "mb-8" },
-      label({ class: "block font-medium mb-2" }, "Button Type:"),
+      { class: 'mb-8' },
+      label({ class: 'block font-medium mb-2' }, 'Button Type:'),
       div(
-        { class: "flex items-center space-x-4" },
-        ...buttonTypes.map((type) =>
+        { class: 'flex items-center space-x-4' },
+        ...buttonTypes.map((type: string) =>
           label(
-            { class: "flex items-center" },
+            { class: 'flex items-center' },
             input({
-              type: "radio",
-              name: `buttonType--group${id}`,
+              type: 'radio',
+              name: `buttonType--group${index}`,
               value: type,
-              class: "form-radio text-yellow-500",
+              class: 'form-radio text-yellow-500',
               checked: data.config.buttonType == type,
               onchange: () => {
                 data.config.buttonType = type;
@@ -75,7 +72,7 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
               },
             }),
             span(
-              { class: "ml-2" },
+              { class: 'ml-2' },
               type.charAt(0).toUpperCase() + type.slice(1)
             )
           )
@@ -83,14 +80,14 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
       )
     ),
     () =>
-      data.config.buttonType == "search"
+      data.config.buttonType == 'search'
         ? div(
-            { class: "" },
-            label({ class: "block font-medium mb-2" }, "Target URL:"),
+            { class: '' },
+            label({ class: 'block font-medium mb-2' }, 'Target URL:'),
             input({
-              type: "text",
-              class: "w-full border rounded p-2 bg-stone-50",
-              placeholder: "",
+              type: 'text',
+              class: 'w-full border rounded p-2 bg-stone-50',
+              placeholder: '',
               value: () => data.config.searchUrl,
               oninput: (e) => {
                 data.config.searchUrl = e.target.value;
@@ -105,25 +102,25 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
                 }
               },
             }),
-            div({ class: "h-8" }, () =>
+            div({ class: 'h-8' }, () =>
               data.validation.isValidSearchUrl
-                ? ""
+                ? ''
                 : p(
-                    { class: "h-8 text-red-400" },
+                    { class: 'h-8 text-red-400' },
                     "Make sure to include '$TL-TEXT$' in the URL."
                   )
             )
           )
-        : "",
+        : '',
     () =>
-      data.config.buttonType == "share"
+      data.config.buttonType == 'share'
         ? div(
-            { class: "" },
-            label({ class: "block font-medium mb-2" }, "Target URL:"),
+            { class: '' },
+            label({ class: 'block font-medium mb-2' }, 'Target URL:'),
             input({
-              type: "text",
-              class: "w-full border rounded p-2 bg-stone-50",
-              placeholder: "",
+              type: 'text',
+              class: 'w-full border rounded p-2 bg-stone-50',
+              placeholder: '',
               value: () => data.config.shareUrl,
               oninput: (e) => {
                 data.config.shareUrl = e.target.value;
@@ -138,25 +135,25 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
                 }
               },
             }),
-            div({ class: "h-8" }, () =>
+            div({ class: 'h-8' }, () =>
               data.validation.isValidShareUrl
-                ? ""
+                ? ''
                 : p(
-                    { class: "text-red-400" },
+                    { class: 'text-red-400' },
                     "Make sure to include '$TL-TEXT$' and '$TL-URL$' in the URL."
                   )
             )
           )
-        : "",
+        : '',
     div(
       label(
-        { class: "block font-medium mb-2" },
-        "Button Character (Optional):"
+        { class: 'block font-medium mb-2' },
+        'Button Character (Optional):'
       ),
       input({
-        type: "text",
-        class: "w-[2rem] h-8 border rounded p-2 bg-stone-50",
-        placeholder: "",
+        type: 'text',
+        class: 'w-[2rem] h-8 border rounded p-2 bg-stone-50',
+        placeholder: '',
         value: data.config.buttonChar,
         oninput: (e) => {
           data.config.buttonChar = e.target.value;
@@ -171,22 +168,39 @@ const ConfigCard = ({ id, config }: ConfigCardProps) => {
           }
         },
       }),
-      div({ class: "h-8" }, () =>
+      div({ class: 'h-8' }, () =>
         data.validation.isValidCharacter
-          ? ""
-          : p({ class: "text-red-400" }, "Only one character is allowed.")
+          ? ''
+          : p({ class: 'text-red-400' }, 'Only one character is allowed.')
       )
     )
   );
 };
 
 (async () => {
+  const buttonTypes = [
+    'search',
+    'copy',
+    'share',
+    'speak',
+    'note',
+  ] as ButtonType[];
+  /*
+  const { isExtensionInstalled } = await chrome.runtime.sendMessage({
+    type: MSG_TYPE.IS_INSTALLED,
+  });
+
+  if (isExtensionInstalled === true) {
+    buttonTypes.push("note");
+  }
+*/
   const ConfigCards = (await fetchButtonConfigs()).map((config, index) =>
     ConfigCard({
-      id: index,
-      config: config,
+      index,
+      config,
+      buttonTypes,
     })
   );
 
-  van.add(document.querySelector("main")!, ConfigCards);
+  van.add(document.querySelector('main')!, ConfigCards);
 })();

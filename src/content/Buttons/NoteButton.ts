@@ -4,18 +4,37 @@ import type { ButtonConfig } from '../../utils/constants';
 const { button, span } = van.tags;
 const { svg, path } = van.tags('http://www.w3.org/2000/svg');
 
-const sendTextToClickNote = async (text: string) => {
-  console.log('Click Note Status Check');
-  console.log(text);
+const sendTextToClickNote = async (text: string, shiftKey: boolean) => {
   try {
-    //await navigator.clipboard.writeText(text);
+    await sendMessage(text, shiftKey);
   } catch (err) {
-    /*
-    console.warn("Failed to copy text using Clipboard API: ", err);
-    console.warn("Trying the old method.");
-    fallbackCopyText(text);
-    */
+    alert(
+      "Sorry, I couldn't send selected text to ClickNote. It may be turned off or not installed."
+    );
+    console.warn('Failed to send message to ClickNote: ', err);
   }
+};
+
+const sendMessage = (selectedText: string, shiftKey: boolean) => {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(
+      'gfdikilcklflffnhapfibppbfoaaemle',
+      {
+        type: 'insertSelectedText',
+        selectedText: selectedText,
+        title: document.title ? document.title : 'No title',
+        url: location.href ? location.href : 'No url',
+        shiftKey: shiftKey,
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(response);
+        }
+      }
+    );
+  });
 };
 
 const NoteIcon = (props: any = {}) => {
@@ -40,7 +59,7 @@ export const NoteButton = (
         e.preventDefault();
         e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);
-        sendTextToClickNote(selectedText.val);
+        sendTextToClickNote(selectedText.val, e.shiftKey);
       },
     },
     span(config.buttonChar != '' ? config.buttonChar : NoteIcon())

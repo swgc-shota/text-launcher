@@ -1,5 +1,8 @@
 import { STOR_KEYS, APP_STATUS, MSG_TYPE } from '../utils/constants';
-import type { Message, AppStatus, ButtonConfig } from '../utils/constants';
+import type { Message, AppStatus } from '../utils/constants';
+import { fetchFromLocalStorage } from '../utils/misc';
+import { initBadge, updateBadge } from './badge';
+import { initStorage } from './storage';
 
 const reloadAllTabs = async () => {
   const tabs = await chrome.tabs.query({});
@@ -17,65 +20,6 @@ const reloadAllTabs = async () => {
 const initApp = async () => {
   await initStorage();
   await initBadge();
-};
-
-const initStorage = async (): Promise<void> => {
-  const currentStatus = await getAppStatus();
-  if (currentStatus === undefined) {
-    await chrome.storage.local.set({
-      [STOR_KEYS.APP_STATUS]: APP_STATUS.ON,
-    });
-    await chrome.storage.local.set({
-      [STOR_KEYS.BTN0]: createButtonConfig(STOR_KEYS.BTN0, 'search'),
-    });
-    await chrome.storage.local.set({
-      [STOR_KEYS.BTN1]: createButtonConfig(STOR_KEYS.BTN1, 'copy'),
-    });
-    await chrome.storage.local.set({
-      [STOR_KEYS.BTN2]: createButtonConfig(
-        STOR_KEYS.BTN2,
-        'share',
-        'https://www.google.com/search?q=$TL-TEXT$',
-        'https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$',
-        '𝕏'
-      ),
-    });
-    await chrome.storage.local.set({
-      [STOR_KEYS.BTN3]: createButtonConfig(STOR_KEYS.BTN3, 'speak'),
-    });
-  }
-};
-
-const createButtonConfig = (
-  storageKey: string,
-  type: string,
-  search: string = 'https://www.google.com/search?q=$TL-TEXT$',
-  share: string = 'https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$',
-  char: string = ''
-): ButtonConfig => {
-  return {
-    storageKey,
-    buttonType: type,
-    searchUrl: search,
-    shareUrl: share,
-    buttonChar: char,
-  };
-};
-
-const getAppStatus = async (): Promise<AppStatus> => {
-  const { APP_STATUS } = await chrome.storage.local.get(STOR_KEYS.APP_STATUS);
-  return APP_STATUS;
-};
-
-const initBadge = async (): Promise<void> => {
-  const appStatus = await getAppStatus();
-  updateBadge(appStatus);
-};
-
-const updateBadge = (newStatus: AppStatus) => {
-  const isNewStatusOff = newStatus === APP_STATUS.OFF;
-  const iconName = isNewStatusOff ? 'icon16_off.png' : 'icon16_on.png';
-  chrome.action.setIcon({ path: `images/${iconName}` });
 };
 
 const toggleApp = async (message: Message, exceptTabIds: number[] = []) => {
@@ -144,13 +88,17 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 chrome.action.onClicked.addListener(async (): Promise<void> => {
-  const currentStatus: AppStatus = await getAppStatus();
+  const currentStatus: AppStatus = await fetchFromLocalStorage(
+    STOR_KEYS.APP_STATUS
+  );
+
   const isOn = currentStatus === APP_STATUS.ON;
   const newStatus = isOn ? APP_STATUS.OFF : APP_STATUS.ON;
   const message: Message = {
     type: MSG_TYPE.TOGGLE_APP,
     newStatus: newStatus,
   };
+
   toggleApp(message);
 });
 

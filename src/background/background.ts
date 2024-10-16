@@ -1,4 +1,4 @@
-import { STOR_KEY, APP_STATUS, MSG_TYPE } from '../utils/constants';
+import { STOR_KEYS, APP_STATUS, MSG_TYPE } from '../utils/constants';
 import type { Message, AppStatus, ButtonConfig } from '../utils/constants';
 
 const reloadAllTabs = async () => {
@@ -23,23 +23,17 @@ const initStorage = async (): Promise<void> => {
   const currentStatus = await getAppStatus();
   if (currentStatus === undefined) {
     await chrome.storage.local.set({
-      [STOR_KEY.APP_STATUS]: APP_STATUS.ON,
+      [STOR_KEYS.APP_STATUS]: APP_STATUS.ON,
     });
     await chrome.storage.local.set({
-      [STOR_KEY.BUTTON_CONFIG_0]: createButtonConfig(
-        STOR_KEY.BUTTON_CONFIG_0,
-        'search'
-      ),
+      [STOR_KEYS.BTN0]: createButtonConfig(STOR_KEYS.BTN0, 'search'),
     });
     await chrome.storage.local.set({
-      [STOR_KEY.BUTTON_CONFIG_1]: createButtonConfig(
-        STOR_KEY.BUTTON_CONFIG_1,
-        'copy'
-      ),
+      [STOR_KEYS.BTN1]: createButtonConfig(STOR_KEYS.BTN1, 'copy'),
     });
     await chrome.storage.local.set({
-      [STOR_KEY.BUTTON_CONFIG_2]: createButtonConfig(
-        STOR_KEY.BUTTON_CONFIG_2,
+      [STOR_KEYS.BTN2]: createButtonConfig(
+        STOR_KEYS.BTN2,
         'share',
         'https://www.google.com/search?q=$TL-TEXT$',
         'https://x.com/intent/post?text=$TL-TEXT$&url=$TL-URL$',
@@ -47,10 +41,7 @@ const initStorage = async (): Promise<void> => {
       ),
     });
     await chrome.storage.local.set({
-      [STOR_KEY.BUTTON_CONFIG_3]: createButtonConfig(
-        STOR_KEY.BUTTON_CONFIG_3,
-        'speak'
-      ),
+      [STOR_KEYS.BTN3]: createButtonConfig(STOR_KEYS.BTN3, 'speak'),
     });
   }
 };
@@ -72,7 +63,7 @@ const createButtonConfig = (
 };
 
 const getAppStatus = async (): Promise<AppStatus> => {
-  const { APP_STATUS } = await chrome.storage.local.get(STOR_KEY.APP_STATUS);
+  const { APP_STATUS } = await chrome.storage.local.get(STOR_KEYS.APP_STATUS);
   return APP_STATUS;
 };
 
@@ -90,7 +81,7 @@ const updateBadge = (newStatus: AppStatus) => {
 const toggleApp = async (message: Message, exceptTabIds: number[] = []) => {
   await sendMessageToAllTabs(message, exceptTabIds);
   await chrome.storage.local.set({
-    [STOR_KEY.APP_STATUS]: message.newStatus,
+    [STOR_KEYS.APP_STATUS]: message.newStatus,
   });
   updateBadge(message.newStatus as AppStatus);
 };
@@ -197,17 +188,9 @@ async function handleMessage(
         break;
 
       case MSG_TYPE.OPEN_OPTION_PAGE:
-        await openOptionsPage();
+        openOptionsPage();
         break;
-      /*
-      case MSG_TYPE.IS_INSTALLED:
-        result = {
-          isExtensionInstalled: await isExtensionInstalled(
-            "gfdikilcklflffnhapfibppbfoaaemle"
-          ),
-        };
-        break;
-*/
+
       default:
         return { type: MSG_TYPE.UNKNOWN };
     }
@@ -216,16 +199,3 @@ async function handleMessage(
     return { type: MSG_TYPE.UNKNOWN, error: error };
   }
 }
-/*
-const isExtensionInstalled = (extensionId: string) => {
-  return new Promise((resolve) => {
-    chrome.management.get(extensionId, (_) => {
-      if (chrome.runtime.lastError) {
-        resolve(false);
-      } else {
-        resolve(true);
-      }
-    });
-  });
-};
-*/

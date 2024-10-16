@@ -1,5 +1,5 @@
-import { BUTTON_CONFIG_KEY } from "./constants";
-import type { ButtonConfig, Message, StorKey } from "./constants";
+import type { ButtonConfig, Message, StorKey } from './constants';
+import { BTN_CONF_KEYS } from './constants';
 
 export const sendMessageToBackground = async (message: Message) => {
   return new Promise((resolve, reject) => {
@@ -14,8 +14,14 @@ export const sendMessageToBackground = async (message: Message) => {
 };
 
 export const fetchFromLocalStorage = async <T>(key: StorKey): Promise<T> => {
-  const _temp = await chrome.storage.local.get(key);
-  return _temp[key];
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(key, (result) => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      resolve(result[key]);
+    });
+  });
 };
 
 export const saveToLocalStorage = async (
@@ -32,14 +38,15 @@ export const saveToLocalStorage = async (
 
 export const fetchButtonConfigs = async () => {
   const result = [] as ButtonConfig[];
-  for (const [_, value] of Object.entries(BUTTON_CONFIG_KEY)) {
-    result.push(await fetchFromLocalStorage(value));
+  for (const [_, key] of Object.entries(BTN_CONF_KEYS)) {
+    result.push(await fetchFromLocalStorage(key));
   }
   return result;
 };
 
+type MyEventName = 'appoff';
 export const fireCustomEvent = (
-  customEventName: string,
+  customEventName: MyEventName,
   detail: any = {},
   element: Element | Document = document
 ) => {

@@ -45,10 +45,7 @@ export const SearchButton = (
   button(
     {
       class: classes,
-      onpointerover: (_: PointerEvent) => console.log('pointerevent!'),
-      onpointerdown: (_) => console.log('pointerdown'),
       onclick: (e: MouseEvent) => {
-        console.log('Seach Button Clicked!');
         e.preventDefault();
         e.stopPropagation();
         bounceIcon(e.currentTarget as HTMLButtonElement);

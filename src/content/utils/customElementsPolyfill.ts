@@ -1,21 +1,24 @@
-import "@webcomponents/custom-elements/custom-elements.min.js";
-import "../content.css";
+import '@webcomponents/custom-elements/custom-elements.min.js';
+import '../text-launcher.css';
 
 class ContentScriptContainer extends HTMLElement {
   private container: HTMLDivElement;
   constructor() {
     super();
-    this.container = document.createElement("div");
-    const shadowRoot = this.attachShadow({ mode: "open" });
+    this.container = document.createElement('div');
+    const shadowRoot = this.attachShadow({ mode: 'open' });
 
-    const style = document.createElement("link");
-    style.rel = "stylesheet";
-    style.type = "text/css";
-    style.href = chrome.runtime.getURL("content.css");
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.type = 'text/css';
+    style.href = chrome.runtime.getURL('text-launcher.css');
 
     shadowRoot.appendChild(style);
 
-    shadowRoot.appendChild(this.container);
+    // This setTimeout() is needed to prevent FOUC
+    setTimeout(() => {
+      shadowRoot.appendChild(this.container);
+    }, 100);
   }
 
   addElement(dom: HTMLElement) {

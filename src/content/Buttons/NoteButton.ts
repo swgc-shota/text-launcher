@@ -1,6 +1,7 @@
 import van, { State } from 'vanjs-core';
+import { cruntime } from '@/common/customAPI/customAPI';
 import { bounceIcon } from './utils';
-import type { ButtonConfig } from '../../utils/constants';
+import type { ButtonConfig } from '@/common/appToggler/background/stroage';
 const { button, span } = van.tags;
 const { svg, path } = van.tags('http://www.w3.org/2000/svg');
 
@@ -17,7 +18,7 @@ const sendTextToClickNote = async (text: string, shiftKey: boolean) => {
 
 const sendMessage = (selectedText: string, shiftKey: boolean) => {
   return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
+    cruntime.sendMessage(
       'gfdikilcklflffnhapfibppbfoaaemle',
       {
         type: 'insertSelectedText',
@@ -27,8 +28,8 @@ const sendMessage = (selectedText: string, shiftKey: boolean) => {
         shiftKey: shiftKey,
       },
       (response) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
+        if (cruntime.lastError) {
+          reject(cruntime.lastError);
         } else {
           resolve(response);
         }

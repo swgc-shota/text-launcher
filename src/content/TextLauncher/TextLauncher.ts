@@ -1,18 +1,14 @@
 import { prepareContainer } from '../utils/customElementsPolyfill';
 import van, { State } from 'vanjs-core';
-import {
-  sendMessageToBackground,
-  fetchButtonConfigs,
-  fireCustomEvent,
-} from '../../utils/misc';
-import { MSG_TYPE, BUTTON_TYPE } from '../../utils/constants';
+import { fireCustomEvent } from '@/common/utils';
 import { SpeakButton } from '../Buttons/SpeakButton';
 import { ShareButton } from '../Buttons/ShareButton';
 import { CopyButton } from '../Buttons/CopyButton';
 import { SearchButton } from '../Buttons/SearchButton';
 import { NoteButton } from '../Buttons/NoteButton';
-import type { ButtonConfig } from '../../utils/constants';
+import type { ButtonConfig } from '@/common/appToggler/background/stroage';
 import { selectComponent } from '../utils/queryHelpers';
+import { cruntime, cstorage } from '@/common/customAPI/customAPI';
 
 const { div, button } = van.tags;
 const { svg, path } = van.tags('http://www.w3.org/2000/svg');
@@ -23,7 +19,7 @@ const initTextLauncher = async () => {
 };
 
 const deinitTextLauncher = () => {
-  fireCustomEvent('appoff');
+  fireCustomEvent('toggleApp');
   const container = document.querySelector('text-launcher');
   if (container) {
     container?.remove();
@@ -116,15 +112,15 @@ const assignButton = (
   buttonClasses += id == 3 ? 'rounded-r' : '';
 
   switch (config.buttonType) {
-    case BUTTON_TYPE.SEARCH:
+    case 'search':
       return SearchButton(selectedText, config, buttonClasses);
-    case BUTTON_TYPE.COPY:
+    case 'copy':
       return CopyButton(selectedText, config, buttonClasses);
-    case BUTTON_TYPE.SHARE:
+    case 'share':
       return ShareButton(selectedText, config, buttonClasses);
-    case BUTTON_TYPE.SPEAK:
+    case 'speak':
       return SpeakButton(selectedText, config, buttonClasses);
-    case BUTTON_TYPE.NOTE:
+    case 'note':
       return NoteButton(selectedText, config, buttonClasses);
     default:
       return button('Something wrong!');
@@ -136,7 +132,13 @@ const TextLauncher = async () => {
   const isVisible = van.state(false);
   addExternalEventListeners(isVisible, selectedText);
 
-  const Buttons = (await fetchButtonConfigs()).map((config, index) => {
+  const buttonConfigs = [] as ButtonConfig[];
+  buttonConfigs.push((await cstorage.local.fetchByKey('button0'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button1'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button2'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button3'))!);
+
+  const Buttons = buttonConfigs.map((config, index) => {
     return assignButton(index, config, selectedText);
   });
 
@@ -155,9 +157,7 @@ const TextLauncher = async () => {
         onclick: (e: MouseEvent) => {
           e.preventDefault();
           e.stopPropagation();
-          sendMessageToBackground({
-            type: MSG_TYPE.OPEN_OPTION_PAGE,
-          });
+          cruntime.sendMessage({ type: 'openOptionPage' });
         },
       },
       svg(

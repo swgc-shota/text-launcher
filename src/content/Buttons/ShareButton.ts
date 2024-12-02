@@ -1,6 +1,6 @@
 import van, { State } from 'vanjs-core';
 import { bounceIcon } from './utils';
-import type { ButtonConfig } from '../../utils/constants';
+import type { ButtonConfig } from '@/common/appToggler/background/stroage';
 import { isValidShareURLTemplate } from '../../utils/validation';
 
 const { button, span } = van.tags;

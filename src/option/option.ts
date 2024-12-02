@@ -1,20 +1,23 @@
 import './option.css';
-
-import van /*, { State }*/ from 'vanjs-core';
+import van from 'vanjs-core';
 import * as vanX from 'vanjs-ext';
-import { ButtonConfig, ButtonType } from '../utils/constants';
-import { fetchButtonConfigs, saveToLocalStorage } from '../utils/misc';
+import type {
+  ButtonConfig,
+  ButtonType,
+  ButtonId,
+} from '@/common/appToggler/background/stroage';
+
 import {
   isValidSearchURLTemplate,
   isValidShareURLTemplate,
   isValidCharacter,
 } from '../utils/validation';
-//import { MSG_TYPE } from '../utils/constants';
+import { cstorage } from '@/common/customAPI/customAPI';
+
 const { div, h2, label, input, span, p } = van.tags;
 
-const formatStateToButtonConfig = (config: any): ButtonConfig => {
+const createButtonConfig = (config: any): ButtonConfig => {
   return {
-    storageKey: config.storageKey,
     buttonType: config.buttonType,
     searchUrl: config.searchUrl,
     shareUrl: config.shareUrl,
@@ -23,14 +26,18 @@ const formatStateToButtonConfig = (config: any): ButtonConfig => {
 };
 interface ConfigCardProps {
   index: number;
+  buttonId: ButtonId;
   config: ButtonConfig;
-  buttonTypes: any;
+  buttonTypes: ButtonType[];
 }
-const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
-  const { storageKey } = config;
+const ConfigCard = ({
+  index,
+  buttonId,
+  config,
+  buttonTypes,
+}: ConfigCardProps) => {
   const data = vanX.reactive({
     config: {
-      storageKey: config.storageKey,
       buttonType: config.buttonType,
       searchUrl: config.searchUrl || '',
       shareUrl: config.shareUrl || '',
@@ -54,7 +61,7 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
       label({ class: 'block font-medium mb-2' }, 'Button Type:'),
       div(
         { class: 'flex items-center space-x-4' },
-        ...buttonTypes.map((type: string) =>
+        ...buttonTypes.map((type) =>
           label(
             { class: 'flex items-center' },
             input({
@@ -65,10 +72,9 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
               checked: data.config.buttonType == type,
               onchange: () => {
                 data.config.buttonType = type;
-                saveToLocalStorage(
-                  storageKey,
-                  formatStateToButtonConfig(data.config)
-                );
+                cstorage.local.save({
+                  [buttonId]: createButtonConfig(data.config),
+                });
               },
             }),
             span(
@@ -93,10 +99,9 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
                 data.config.searchUrl = e.target.value;
                 if (isValidSearchURLTemplate(e.target.value)) {
                   data.validation.isValidSearchUrl = true;
-                  saveToLocalStorage(
-                    storageKey,
-                    formatStateToButtonConfig(data.config)
-                  );
+                  cstorage.local.save({
+                    [buttonId]: createButtonConfig(data.config),
+                  });
                 } else {
                   data.validation.isValidSearchUrl = false;
                 }
@@ -126,10 +131,9 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
                 data.config.shareUrl = e.target.value;
                 if (isValidShareURLTemplate(e.target.value)) {
                   data.validation.isValidShareUrl = true;
-                  saveToLocalStorage(
-                    storageKey,
-                    formatStateToButtonConfig(data.config)
-                  );
+                  cstorage.local.save({
+                    [buttonId]: createButtonConfig(data.config),
+                  });
                 } else {
                   data.validation.isValidShareUrl = false;
                 }
@@ -159,10 +163,9 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
           data.config.buttonChar = e.target.value;
           if (isValidCharacter(e.target.value)) {
             data.validation.isValidCharacter = true;
-            saveToLocalStorage(
-              storageKey,
-              formatStateToButtonConfig(data.config)
-            );
+            cstorage.local.save({
+              [buttonId]: createButtonConfig(data.config),
+            });
           } else {
             data.validation.isValidCharacter = false;
           }
@@ -185,18 +188,19 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
     'speak',
     'note',
   ] as ButtonType[];
-  /*
-  const { isExtensionInstalled } = await chrome.runtime.sendMessage({
-    type: MSG_TYPE.IS_INSTALLED,
-  });
 
-  if (isExtensionInstalled === true) {
-    buttonTypes.push("note");
-  }
-*/
-  const ConfigCards = (await fetchButtonConfigs()).map((config, index) =>
+  const buttonIds = ['button0', 'button1', 'button2', 'button3'] as ButtonId[];
+
+  const buttonConfigs = [] as ButtonConfig[];
+  buttonConfigs.push((await cstorage.local.fetchByKey('button0'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button1'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button2'))!);
+  buttonConfigs.push((await cstorage.local.fetchByKey('button3'))!);
+
+  const ConfigCards = buttonConfigs.map((config, index) =>
     ConfigCard({
       index,
+      buttonId: buttonIds[index],
       config,
       buttonTypes,
     })
@@ -204,3 +208,4 @@ const ConfigCard = ({ index, config, buttonTypes }: ConfigCardProps) => {
 
   van.add(document.querySelector('main')!, ConfigCards);
 })();
+export {};

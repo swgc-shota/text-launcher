@@ -1,5 +1,4 @@
-import { APP_NAME } from "../../utils/constants";
-
+const APP_NAME = 'text-launcher';
 export const selectComponent = (compName: string) =>
   document
     .querySelector(APP_NAME)

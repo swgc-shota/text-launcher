@@ -26,16 +26,18 @@ function isEnglish(text: string, threshold: number = 0.8): boolean {
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
   );
 
+  // スペースと一般的な句読点を除去した文字数をカウント
+  const cleanText = text.replace(/[\s.,'"]/g, '');
+  const totalCount = cleanText.length;
+
   let alphaCount = 0;
-  for (const char of text) {
+  for (const char of cleanText) {
     if (alphabet.has(char)) {
       alphaCount++;
     }
   }
 
-  const totalCount = text.length;
   const alphaRatio = alphaCount / totalCount;
-
   return alphaRatio >= threshold;
 }
 
@@ -112,15 +114,23 @@ const getSpeechLang = (lang: string) => {
 
 const speakText = (text: string) => {
   const utterance = new SpeechSynthesisUtterance(text);
-  let speechLang = '';
+
   if (isEnglish(text)) {
-    speechLang = 'en-US';
+    utterance.lang = 'en-US';
+
+    const natualVoices = speechSynthesis
+      .getVoices()
+      .filter((v) =>
+        v.voiceURI.includes('(Natural) - English (United States)')
+      );
+    if (natualVoices.length !== 0) {
+      utterance.voice = natualVoices[1];
+    }
   } else {
     const htmlLang = document.documentElement.lang;
-    speechLang = htmlLang ? getSpeechLang(htmlLang) : 'en-US';
+    utterance.lang = htmlLang ? getSpeechLang(htmlLang) : 'en-US';
   }
 
-  utterance.lang = speechLang;
   speechSynthesis.speak(utterance);
 };
 

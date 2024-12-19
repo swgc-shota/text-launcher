@@ -68,6 +68,7 @@ export const CopyButton = (
 ) =>
   button(
     {
+      title: 'Copy Button',
       class: classes,
       onclick: (e: MouseEvent) => {
         e.preventDefault();

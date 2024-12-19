@@ -56,6 +56,7 @@ export const NoteButton = (
   button(
     {
       class: classes,
+      title: 'Note Button',
       onclick: (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();

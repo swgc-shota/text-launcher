@@ -142,6 +142,7 @@ export const SpeakButton = (
   button(
     {
       class: classes,
+      title: 'Speak Button',
       onclick: (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();

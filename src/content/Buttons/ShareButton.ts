@@ -49,6 +49,7 @@ export const ShareButton = (
   button(
     {
       class: classes,
+      title: 'Share Button',
       onclick: (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();

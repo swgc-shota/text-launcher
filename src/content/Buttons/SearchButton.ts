@@ -45,6 +45,7 @@ export const SearchButton = (
   button(
     {
       class: classes,
+      title: 'Search Button',
       onclick: (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();

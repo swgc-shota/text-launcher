@@ -118,13 +118,13 @@ const speakText = (text: string) => {
   if (isEnglish(text)) {
     utterance.lang = 'en-US';
 
-    const natualVoices = speechSynthesis
+    const naturalVoices = speechSynthesis
       .getVoices()
       .filter((v) =>
         v.voiceURI.includes('(Natural) - English (United States)')
       );
-    if (natualVoices.length !== 0) {
-      utterance.voice = natualVoices[1];
+    if (naturalVoices.length !== 0) {
+      utterance.voice = naturalVoices[1];
     }
   } else {
     const htmlLang = document.documentElement.lang;

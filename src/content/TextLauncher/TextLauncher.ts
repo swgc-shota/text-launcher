@@ -18,8 +18,13 @@ const initTextLauncher = async () => {
   container.addElement(await TextLauncher());
 };
 
+declare global {
+  interface CMessageTypeMap {
+    appOff: 'appOff';
+  }
+}
 const deinitTextLauncher = () => {
-  fireCustomEvent('toggleApp');
+  fireCustomEvent('appOff');
   const container = document.querySelector('text-launcher');
   if (container) {
     container?.remove();
@@ -80,10 +85,10 @@ const addExternalEventListeners = (
 
   const removeExternalListeners = () => {
     document.removeEventListener('mouseup', visibleLauncher);
-    document.removeEventListener('appoff', deinitTextLauncher);
     document.removeEventListener('visibilitychange', rebootLauncher);
+    document.removeEventListener('appOff', deinitTextLauncher);
   };
-  document.addEventListener('appoff', removeExternalListeners);
+  document.addEventListener('appOff', removeExternalListeners);
 };
 
 const updateLauncherCoord = (e: MouseEvent, launcher: HTMLElement) => {

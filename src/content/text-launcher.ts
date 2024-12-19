@@ -5,14 +5,6 @@ import {
   deinitTextLauncher,
 } from './TextLauncher/TextLauncher';
 
-const handleInitApp = () => {
-  console.log('init!!!!');
-  initTextLauncher();
-};
-
-const handleDeinitApp = () => {
-  console.log('deinit!!!!');
-  deinitTextLauncher();
-};
-
+const handleInitApp = () => initTextLauncher();
+const handleDeinitApp = () => deinitTextLauncher();
 initAppStateToggler(handleInitApp, handleDeinitApp);

@@ -73,6 +73,7 @@ declare global {
   interface CMessageTypeMap {
     type: 'toggleApp';
   }
+  interface DocumentEventMap extends CMessageTypeMap {}
 }
 export interface ToggleAppDetail {
   isAppOn: boolean;
